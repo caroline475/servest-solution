@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jem × Servest — Time & Attendance Solution</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --jem-pink: #FF697F;
+    --jem-pink-hover: #ff4d6b;
+    --jem-navy: #062133;
+    --jem-white: #FCFCFC;
+    --jem-grey: #F2F2F2;
+    --jem-cream: #FFF7EC;
+    --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 24px;
+    --radius-pill: 999px;
+    --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.08);
+    --shadow-button: 0 4px 12px rgba(255, 105, 127, 0.35);
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: var(--font-family);
+    color: var(--jem-navy);
+    background: var(--jem-white);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Password Screen ── */
+  #password-screen {
+    position: fixed;
+    inset: 0;
+    background: var(--jem-navy);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    transition: opacity 0.4s, visibility 0.4s;
+  }
+  #password-screen.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+  .pw-box {
+    text-align: center;
+    max-width: 380px;
+    width: 100%;
+    padding: 0 24px;
+  }
+  .pw-box .pw-logo {
+    display: inline-flex;
+    align-items: center;
+    background: var(--jem-pink);
+    border-radius: var(--radius-pill);
+    padding: 12px 32px;
+    height: 52px;
+    margin-bottom: 40px;
+  }
+  .pw-box .pw-logo span {
+    color: var(--jem-white);
+    font-weight: 800;
+    font-size: 24px;
+    letter-spacing: -0.5px;
+  }
+  .pw-box h2 {
+    color: var(--jem-white);
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .pw-box p {
+    color: rgba(252,252,252,0.6);
+    font-size: 14px;
+    margin-bottom: 28px;
+  }
+  .pw-input-row {
+    display: flex;
+    gap: 12px;
+  }
+  .pw-input-row input {
+    flex: 1;
+    padding: 14px 20px;
+    border-radius: var(--radius-pill);
+    border: 2px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.08);
+    color: var(--jem-white);
+    font-size: 16px;
+    font-family: var(--font-family);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .pw-input-row input::placeholder {
+    color: rgba(252,252,252,0.35);
+  }
+  .pw-input-row input:focus {
+    border-color: var(--jem-pink);
+  }
+  .pw-input-row button {
+    background: var(--jem-pink);
+    color: var(--jem-white);
+    border: none;
+    border-radius: var(--radius-pill);
+    padding: 14px 28px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: var(--font-family);
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+  .pw-input-row button:hover {
+    background: var(--jem-pink-hover);
+  }
+  .pw-error {
+    color: var(--jem-pink);
+    font-size: 13px;
+    font-weight: 500;
+    margin-top: 14px;
+    min-height: 20px;
+  }
+
+  /* ── Page content (hidden until unlocked) ── */
+  #page-content {
+    display: none;
+  }
+  #page-content.visible {
+    display: block;
+  }
+
+  /* ── Logo Bar ── */
+  .logo-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 64px;
+    background: var(--jem-white);
+    border-bottom: 1px solid #eee;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .jem-logo {
+    display: inline-flex;
+    align-items: center;
+    background: var(--jem-pink);
+    border-radius: var(--radius-pill);
+    padding: 10px 28px;
+    height: 48px;
+  }
+  .jem-logo span {
+    color: var(--jem-white);
+    font-weight: 800;
+    font-size: 22px;
+    letter-spacing: -0.5px;
+  }
+  .servest-logo img {
+    height: 40px;
+    object-fit: contain;
+  }
+  .logo-divider {
+    color: #ccc;
+    font-size: 24px;
+    font-weight: 300;
+    margin: 0 20px;
+  }
+  .logo-group {
+    display: flex;
+    align-items: center;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    background: var(--jem-pink);
+    padding: 80px 64px 72px;
+    text-align: center;
+    color: var(--jem-white);
+  }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.2);
+    border-radius: var(--radius-pill);
+    padding: 6px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 24px;
+  }
+  .hero h1 {
+    font-size: 52px;
+    font-weight: 800;
+    line-height: 1.15;
+    max-width: 780px;
+    margin: 0 auto 20px;
+  }
+  .hero p {
+    font-size: 20px;
+    font-weight: 400;
+    opacity: 0.92;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.5;
+  }
+
+  /* ── Section containers ── */
+  .section {
+    padding: 80px 64px;
+  }
+  .section-label {
+    display: inline-block;
+    background: var(--jem-pink);
+    color: var(--jem-white);
+    border-radius: var(--radius-pill);
+    padding: 5px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 16px;
+  }
+  .section h2 {
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 12px;
+  }
+  .section .subtitle {
+    font-size: 18px;
+    color: #555;
+    max-width: 640px;
+    margin-bottom: 48px;
+    line-height: 1.6;
+  }
+
+  /* ── Problem → Solution cards ── */
+  .solution-block {
+    margin-bottom: 64px;
+  }
+  .solution-block h3 {
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .solution-block h3 .num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    background: var(--jem-pink);
+    color: var(--jem-white);
+    border-radius: 50%;
+    font-size: 20px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  /* Flow layout: problems → jem → outcomes */
+  .flow {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 0;
+    align-items: stretch;
+  }
+
+  .flow-col {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .flow-col-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 8px;
+    padding-left: 4px;
+  }
+  .flow-col-label.problems { color: #c0392b; }
+  .flow-col-label.solution { color: var(--jem-pink); }
+
+  .problem-card {
+    background: var(--jem-white);
+    border: 2px solid #f0d0d0;
+    border-radius: var(--radius-lg);
+    padding: 20px 24px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    box-shadow: var(--shadow-card);
+    position: relative;
+  }
+  .problem-card .icon {
+    font-size: 28px;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+  .problem-card .text {
+    flex: 1;
+  }
+  .problem-card .text strong {
+    display: block;
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: var(--jem-navy);
+  }
+  .problem-card .text span {
+    font-size: 13px;
+    color: #666;
+    line-height: 1.5;
+  }
+
+  .outcome-card {
+    background: var(--jem-white);
+    border: 2px solid #c8f0d0;
+    border-radius: var(--radius-lg);
+    padding: 20px 24px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    box-shadow: var(--shadow-card);
+  }
+  .outcome-card .icon {
+    font-size: 28px;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+  .outcome-card .text {
+    flex: 1;
+  }
+  .outcome-card .text strong {
+    display: block;
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: var(--jem-navy);
+  }
+  .outcome-card .text span {
+    font-size: 13px;
+    color: #666;
+    line-height: 1.5;
+  }
+
+  /* Arrow connector in the middle */
+  .flow-arrow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0 32px;
+    position: relative;
+  }
+  .flow-arrow .jem-pill {
+    background: var(--jem-pink);
+    color: var(--jem-white);
+    border-radius: var(--radius-pill);
+    padding: 10px 24px;
+    font-weight: 700;
+    font-size: 15px;
+    white-space: nowrap;
+    box-shadow: var(--shadow-button);
+    z-index: 2;
+    position: relative;
+  }
+  .flow-arrow::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 3px;
+    background: linear-gradient(to bottom, #f0d0d0, var(--jem-pink), #c8f0d0);
+    transform: translateX(-50%);
+    z-index: 1;
+  }
+
+  /* ── Savings banner ── */
+  .savings-banner {
+    background: var(--jem-navy);
+    border-radius: var(--radius-lg);
+    padding: 36px 44px;
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    margin-top: 32px;
+  }
+  .savings-banner .savings-icon {
+    font-size: 48px;
+    flex-shrink: 0;
+  }
+  .savings-banner .savings-content h4 {
+    color: var(--jem-pink);
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 6px;
+  }
+  .savings-banner .savings-big {
+    color: var(--jem-white);
+    font-size: 36px;
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+  .savings-banner .savings-detail {
+    color: rgba(252,252,252,0.7);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .savings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-top: 24px;
+  }
+  .savings-stat {
+    text-align: center;
+  }
+  .savings-stat .val {
+    color: var(--jem-pink);
+    font-size: 28px;
+    font-weight: 800;
+    display: block;
+    margin-bottom: 4px;
+  }
+  .savings-stat .label {
+    color: rgba(252,252,252,0.7);
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  /* ── Efficiency (non-financial) pills ── */
+  .efficiency-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 20px;
+  }
+  .eff-pill {
+    background: var(--jem-cream);
+    border-radius: var(--radius-pill);
+    padding: 8px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--jem-navy);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .eff-pill .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--jem-pink);
+    flex-shrink: 0;
+  }
+
+  /* ── Why Jem section ── */
+  .why-jem-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    margin-top: 48px;
+  }
+  .why-card {
+    background: var(--jem-white);
+    border-radius: var(--radius-lg);
+    padding: 32px 36px;
+    box-shadow: var(--shadow-card);
+    border-top: 4px solid var(--jem-pink);
+  }
+  .why-card .why-icon {
+    font-size: 36px;
+    margin-bottom: 16px;
+  }
+  .why-card h4 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--jem-navy);
+  }
+  .why-card p {
+    font-size: 14px;
+    color: #555;
+    line-height: 1.6;
+  }
+  .why-card .vs-tag {
+    display: inline-block;
+    background: var(--jem-grey);
+    border-radius: var(--radius-pill);
+    padding: 3px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #888;
+    margin-top: 12px;
+  }
+
+  /* ── Callout / quote ── */
+  .callout {
+    border-left: 4px solid var(--jem-pink);
+    background: var(--jem-cream);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    padding: 28px 32px;
+    margin: 48px 0;
+  }
+  .callout p {
+    font-size: 20px;
+    font-weight: 600;
+    font-style: italic;
+    color: var(--jem-navy);
+    line-height: 1.5;
+  }
+  .callout .attr {
+    font-size: 14px;
+    font-weight: 500;
+    color: #888;
+    margin-top: 8px;
+    font-style: normal;
+  }
+
+  /* ── Timeline / approach ── */
+  .approach-steps {
+    display: flex;
+    gap: 24px;
+    margin-top: 40px;
+  }
+  .approach-step {
+    flex: 1;
+    background: var(--jem-white);
+    border-radius: var(--radius-lg);
+    padding: 28px 28px;
+    box-shadow: var(--shadow-card);
+    position: relative;
+  }
+  .approach-step .step-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: var(--jem-pink);
+    color: var(--jem-white);
+    border-radius: 50%;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 14px;
+  }
+  .approach-step h4 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--jem-navy);
+  }
+  .approach-step p {
+    font-size: 13px;
+    color: #666;
+    line-height: 1.6;
+  }
+  .approach-step::after {
+    content: '\2192';
+    position: absolute;
+    right: -18px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 24px;
+    color: var(--jem-pink);
+    font-weight: 700;
+  }
+  .approach-step:last-child::after {
+    display: none;
+  }
+
+  /* ── Footer CTA ── */
+  .footer-cta {
+    background: var(--jem-navy);
+    padding: 64px;
+    text-align: center;
+    color: var(--jem-white);
+  }
+  .footer-cta h2 {
+    font-size: 36px;
+    font-weight: 800;
+    margin-bottom: 16px;
+    color: var(--jem-white);
+  }
+  .footer-cta p {
+    font-size: 18px;
+    opacity: 0.8;
+    margin-bottom: 32px;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .footer-cta .cta-btn {
+    display: inline-block;
+    background: var(--jem-pink);
+    color: var(--jem-white);
+    border-radius: var(--radius-pill);
+    padding: 16px 40px;
+    font-size: 17px;
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: var(--shadow-button);
+    transition: background 0.2s;
+  }
+  .footer-cta .cta-btn:hover {
+    background: var(--jem-pink-hover);
+  }
+  .footer-cta .logos-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 40px;
+    opacity: 0.6;
+  }
+  .footer-cta .logos-footer img {
+    height: 32px;
+    filter: brightness(0) invert(1);
+  }
+
+  /* ── Divider ── */
+  .divider {
+    height: 1px;
+    background: #eee;
+    margin: 0 64px;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .hero h1 { font-size: 36px; }
+    .section { padding: 56px 32px; }
+    .logo-bar { padding: 20px 32px; }
+    .flow { grid-template-columns: 1fr; gap: 24px; }
+    .flow-arrow { flex-direction: row; padding: 16px 0; }
+    .flow-arrow::before { display: none; }
+    .why-jem-grid { grid-template-columns: 1fr; }
+    .approach-steps { flex-direction: column; }
+    .approach-step::after { display: none; }
+    .savings-banner { flex-direction: column; text-align: center; }
+    .footer-cta { padding: 48px 32px; }
+  }
+
+  /* ── Total savings highlight ── */
+  .total-savings {
+    background: linear-gradient(135deg, var(--jem-pink), #e84a64);
+    border-radius: var(--radius-lg);
+    padding: 44px 52px;
+    text-align: center;
+    color: var(--jem-white);
+    margin-top: 48px;
+    box-shadow: 0 12px 40px rgba(255, 105, 127, 0.3);
+  }
+  .total-savings .total-label {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    opacity: 0.85;
+    margin-bottom: 8px;
+  }
+  .total-savings .total-amount {
+    font-size: 56px;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 8px;
+  }
+  .total-savings .total-sub {
+    font-size: 16px;
+    font-weight: 500;
+    opacity: 0.85;
+  }
+
+  /* ── Scale note ── */
+  .scale-note {
+    background: var(--jem-grey);
+    border-radius: var(--radius-md);
+    padding: 14px 20px;
+    font-size: 13px;
+    color: #666;
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .scale-note strong {
+    color: var(--jem-navy);
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════ -->
+<!-- ── Password Gate ── -->
+<!-- ══════════════════════════════════════ -->
+<div id="password-screen">
+  <div class="pw-box">
+    <div class="pw-logo"><span>jem</span></div>
+    <h2>This document is protected</h2>
+    <p>Enter the password to view the Servest proposal.</p>
+    <div class="pw-input-row">
+      <input type="password" id="pw-input" placeholder="Password" autocomplete="off" />
+      <button id="pw-btn" onclick="checkPassword()">Enter</button>
+    </div>
+    <div class="pw-error" id="pw-error"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- ── Page Content (hidden until auth) ── -->
+<!-- ══════════════════════════════════════ -->
+<div id="page-content">
+
+<!-- ── Logo Bar ── -->
+<div class="logo-bar">
+  <div class="logo-group">
+    <div class="jem-logo"><span>jem</span></div>
+    <span class="logo-divider">&times;</span>
+    <div class="servest-logo">
+      <img src="https://www.servest.co.za/wp-content/uploads/2024/10/Logo-main.png" alt="Servest" />
+    </div>
+  </div>
+  <div style="font-size: 12px; font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: 1.5px;">Proposed Solution</div>
+</div>
+
+<!-- ── Hero ── -->
+<div class="hero">
+  <div class="hero-badge">Time &amp; Attendance</div>
+  <h1>Intelligent shift management, delivered through WhatsApp</h1>
+  <p>Replacing manual chaos with automated attendance enforcement, smart rostering, and measurable cost savings — at scale.</p>
+</div>
+
+<!-- ── The Problem ── -->
+<div class="section" style="background: var(--jem-grey);">
+  <span class="section-label">The Reality Today</span>
+  <h2>6,000 guards. 500 sites. One manual process.</h2>
+  <p class="subtitle">Every day, Servest's control rooms fight the same battle — no-shows, late arrivals, scrambled replacements, and hours lost on calls. The cost isn't just operational — it's financial.</p>
+
+  <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;">
+    <div style="background: var(--jem-white); border-radius: var(--radius-lg); padding: 28px; box-shadow: var(--shadow-card); text-align: center;">
+      <div style="font-size: 40px; margin-bottom: 12px;">&#128222;</div>
+      <div style="font-size: 32px; font-weight: 800; color: var(--jem-navy);">400–600</div>
+      <div style="font-size: 13px; color: #888; font-weight: 500; margin-top: 4px;">Manual calls per day</div>
+    </div>
+    <div style="background: var(--jem-white); border-radius: var(--radius-lg); padding: 28px; box-shadow: var(--shadow-card); text-align: center;">
+      <div style="font-size: 40px; margin-bottom: 12px;">&#9201;&#65039;</div>
+      <div style="font-size: 32px; font-weight: 800; color: var(--jem-navy);">90 min</div>
+      <div style="font-size: 13px; color: #888; font-weight: 500; margin-top: 4px;">Avg. response delay</div>
+    </div>
+    <div style="background: var(--jem-white); border-radius: var(--radius-lg); padding: 28px; box-shadow: var(--shadow-card); text-align: center;">
+      <div style="font-size: 40px; margin-bottom: 12px;">&#128184;</div>
+      <div style="font-size: 32px; font-weight: 800; color: var(--jem-navy);">R7.5M</div>
+      <div style="font-size: 13px; color: #888; font-weight: 500; margin-top: 4px;">Annual revenue leakage</div>
+    </div>
+    <div style="background: var(--jem-white); border-radius: var(--radius-lg); padding: 28px; box-shadow: var(--shadow-card); text-align: center;">
+      <div style="font-size: 40px; margin-bottom: 12px;">&#128260;</div>
+      <div style="font-size: 32px; font-weight: 800; color: var(--jem-navy);">~100</div>
+      <div style="font-size: 13px; color: #888; font-weight: 500; margin-top: 4px;">Replacements arranged daily</div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ── SOLUTION 1: Shift Attendance ── -->
+<div class="section">
+  <span class="section-label">Solution 1</span>
+  <h2>Automated shift attendance &amp; instant replacement</h2>
+  <p class="subtitle">From shift start to replacement — fully automated, with no human calling required.</p>
+
+  <div class="flow">
+    <!-- Problems column -->
+    <div class="flow-col">
+      <div class="flow-col-label problems">Problems Eliminated</div>
+
+      <div class="problem-card">
+        <div class="icon">&#128683;</div>
+        <div class="text">
+          <strong>Sites left uncovered</strong>
+          <span>Guards don't arrive, nobody knows for up to 90 minutes. Client sites run unprotected.</span>
+        </div>
+      </div>
+
+      <div class="problem-card">
+        <div class="icon">&#128560;</div>
+        <div class="text">
+          <strong>Control room scrambling</strong>
+          <span>Area managers and control rooms spend hours making manual calls to find out where guards are.</span>
+        </div>
+      </div>
+
+      <div class="problem-card">
+        <div class="icon">&#128222;</div>
+        <div class="text">
+          <strong>400–600 daily manual calls</strong>
+          <span>13–20 hours of staff time every day, just calling guards who didn't clock in.</span>
+        </div>
+      </div>
+
+      <div class="problem-card">
+        <div class="icon">&#128260;</div>
+        <div class="text">
+          <strong>Manual shift replacements</strong>
+          <span>Finding, calling, and confirming a replacement guard is slow, error-prone, and biased.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Arrow / Jem connector -->
+    <div class="flow-arrow">
+      <div class="jem-pill">jem solves this</div>
+    </div>
+
+    <!-- Outcomes column -->
+    <div class="flow-col">
+      <div class="flow-col-label solution">How Jem Fixes It</div>
+
+      <div class="outcome-card">
+        <div class="icon">&#9989;</div>
+        <div class="text">
+          <strong>Instant roll call at shift start</strong>
+          <span>Automated WhatsApp check-in at the exact moment a shift begins. No-shows flagged in seconds, not hours.</span>
+        </div>
+      </div>
+
+      <div class="outcome-card">
+        <div class="icon">&#129302;</div>
+        <div class="text">
+          <strong>AI calls to no-show guards</strong>
+          <span>Automated voice calls to absent guards — no human intervention. Escalation if unanswered.</span>
+        </div>
+      </div>
+
+      <div class="outcome-card">
+        <div class="icon">&#9889;</div>
+        <div class="text">
+          <strong>Automated shift replacement</strong>
+          <span>Jem instantly offers the shift to appropriately skilled, closest available guards — fair, fast, optimised.</span>
+        </div>
+      </div>
+
+      <div class="outcome-card">
+        <div class="icon">&#128202;</div>
+        <div class="text">
+          <strong>Real-time attendance dashboard</strong>
+          <span>Live visibility into who's on site, who's late, and which shifts are at risk — across all 500 sites.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Financial savings -->
+  <div class="savings-banner">
+    <div class="savings-icon">&#128176;</div>
+    <div class="savings-content" style="flex: 1;">
+      <h4>Estimated Annual Savings</h4>
+      <div class="savings-grid">
+        <div class="savings-stat">
+          <span class="val">R1.5M–R2.5M</span>
+          <span class="label">Replacement cost reduction</span>
+        </div>
+        <div class="savings-stat">
+          <span class="val">R5M–R6.3M</span>
+          <span class="label">Revenue leakage recovered</span>
+        </div>
+        <div class="savings-stat">
+          <span class="val">R650K–R1M</span>
+          <span class="label">Admin time reclaimed</span>
+        </div>
+        <div class="savings-stat">
+          <span class="val">90%</span>
+          <span class="label">Fewer manual calls</span>
+        </div>
+      </div>
+      <div class="scale-note" style="margin-top: 20px; background: rgba(255,255,255,0.08); border-radius: var(--radius-md); padding: 12px 16px;">
+        <span>&#128208;</span>
+        <span>Figures shown for Servest's 6,000 guards. <strong>For a 5,000-guard operation, scale proportionally — R6M–R8.2M total annual savings.</strong></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Non-financial efficiencies -->
+  <div style="margin-top: 28px;">
+    <div style="font-size: 13px; font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;">Operational efficiencies</div>
+    <div class="efficiency-row">
+      <div class="eff-pill"><span class="dot"></span>Response time: 90 min &rarr; under 20 min</div>
+      <div class="eff-pill"><span class="dot"></span>Zero sites left unattended</div>
+      <div class="eff-pill"><span class="dot"></span>Reduced SLA penalties &amp; client churn</div>
+      <div class="eff-pill"><span class="dot"></span>Complete audit trail for every shift</div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ── SOLUTION 2: Smart Rostering ── -->
+<div class="section" style="background: var(--jem-grey);">
+  <span class="section-label">Solution 2</span>
+  <h2>AI-powered rostering that cuts costs and removes bias</h2>
+  <p class="subtitle">Intelligent shift scheduling that eliminates favouritism, minimises overtime spend, and ensures every guard is placed where their skills match the site requirement.</p>
+
+  <div class="flow">
+    <!-- Problems column -->
+    <div class="flow-col">
+      <div class="flow-col-label problems">Problems Eliminated</div>
+
+      <div class="problem-card">
+        <div class="icon">&#11088;</div>
+        <div class="text">
+          <strong>Favouritism in overtime allocation</strong>
+          <span>The same guards get extra shifts. Others miss out. Payroll costs inflate unevenly.</span>
+        </div>
+      </div>
+
+      <div class="problem-card">
+        <div class="icon">&#128179;</div>
+        <div class="text">
+          <strong>Excessive overtime pay</strong>
+          <span>Poor scheduling leads to avoidable overtime — a major and controllable cost driver.</span>
+        </div>
+      </div>
+
+      <div class="problem-card">
+        <div class="icon">&#127919;</div>
+        <div class="text">
+          <strong>Wrong skills at wrong sites</strong>
+          <span>Guards placed without matching qualifications to site requirements. Compliance and quality suffer.</span>
+        </div>
+      </div>
+
+      <div class="problem-card">
+        <div class="icon">&#128548;</div>
+        <div class="text">
+          <strong>Workforce dissatisfaction</strong>
+          <span>Uneven distribution of overtime and perceived unfairness leads to attrition and low morale.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Arrow / Jem connector -->
+    <div class="flow-arrow">
+      <div class="jem-pill">jem solves this</div>
+    </div>
+
+    <!-- Outcomes column -->
+    <div class="flow-col">
+      <div class="flow-col-label solution">How Jem Fixes It</div>
+
+      <div class="outcome-card">
+        <div class="icon">&#129504;</div>
+        <div class="text">
+          <strong>AI-optimised rostering</strong>
+          <span>Algorithmic scheduling that balances cost, skills, and fairness — not gut feel or favourites.</span>
+        </div>
+      </div>
+
+      <div class="outcome-card">
+        <div class="icon">&#9878;&#65039;</div>
+        <div class="text">
+          <strong>Fair overtime distribution</strong>
+          <span>Even share of overtime for every guard. Transparent, auditable, and complaint-free.</span>
+        </div>
+      </div>
+
+      <div class="outcome-card">
+        <div class="icon">&#127991;&#65039;</div>
+        <div class="text">
+          <strong>Skills-matched placement</strong>
+          <span>Every shift is filled by a guard whose qualifications match the site's specific needs.</span>
+        </div>
+      </div>
+
+      <div class="outcome-card">
+        <div class="icon">&#128201;</div>
+        <div class="text">
+          <strong>Minimised overtime spend</strong>
+          <span>Optimisation engine reduces unnecessary overtime hours by 10–15% through smarter scheduling.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Financial savings -->
+  <div class="savings-banner">
+    <div class="savings-icon">&#128176;</div>
+    <div class="savings-content" style="flex: 1;">
+      <h4>Estimated Annual Savings</h4>
+      <div class="savings-grid">
+        <div class="savings-stat">
+          <span class="val">10–15%</span>
+          <span class="label">Reduction in overtime hours</span>
+        </div>
+        <div class="savings-stat">
+          <span class="val">R2M–R4M</span>
+          <span class="label">Overtime cost savings</span>
+        </div>
+        <div class="savings-stat">
+          <span class="val">R500K+</span>
+          <span class="label">Reduced mis-placement costs</span>
+        </div>
+        <div class="savings-stat">
+          <span class="val">100%</span>
+          <span class="label">Audit trail on every roster decision</span>
+        </div>
+      </div>
+      <div class="scale-note" style="margin-top: 20px; background: rgba(255,255,255,0.08); border-radius: var(--radius-md); padding: 12px 16px;">
+        <span>&#128208;</span>
+        <span>Figures shown for Servest's 6,000 guards. <strong>For a 5,000-guard operation, scale proportionally — R2.1M–R3.8M total annual savings.</strong></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Non-financial efficiencies -->
+  <div style="margin-top: 28px;">
+    <div style="font-size: 13px; font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;">Operational efficiencies</div>
+    <div class="efficiency-row">
+      <div class="eff-pill"><span class="dot"></span>Happier, more engaged workforce</div>
+      <div class="eff-pill"><span class="dot"></span>Lower attrition from perceived fairness</div>
+      <div class="eff-pill"><span class="dot"></span>Compliance-ready placement records</div>
+      <div class="eff-pill"><span class="dot"></span>Zero manual rostering effort</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Combined Savings ── -->
+<div class="section" style="background: var(--jem-white);">
+  <div class="total-savings">
+    <div class="total-label">Combined Estimated Annual Savings</div>
+    <div class="total-amount">R8M – R12M+</div>
+    <div class="total-sub">For Servest's 6,000-guard operation across 500 sites</div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ── Quote ── -->
+<div class="section" style="padding-top: 48px; padding-bottom: 16px;">
+  <div class="callout">
+    <p>"The system will pay for itself until everyone comes to work at six."</p>
+    <div class="attr">— The biggest long-term value is behaviour change at scale. Once guards know the system is watching, no-show rates drop permanently.</div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ── Why Jem (vs Easy Roster) ── -->
+<div class="section" style="background: var(--jem-grey);">
+  <span class="section-label">Why Jem</span>
+  <h2>The smarter alternative to Easy Roster</h2>
+  <p class="subtitle">Jem doesn't just digitise attendance — it transforms how your workforce operates. Here's why we're the better choice.</p>
+
+  <div class="why-jem-grid">
+    <div class="why-card">
+      <div class="why-icon">&#128172;</div>
+      <h4>Behaviour change through engagement</h4>
+      <p>Jem lives on WhatsApp — where your guards already are. We track read receipts and activity, so guards who use Earned Wage Access but claim they can't clock in get surfaced instantly. Real accountability, not just another app.</p>
+      <div class="vs-tag">Easy Roster: Requires app download &amp; adoption</div>
+    </div>
+
+    <div class="why-card">
+      <div class="why-icon">&#128268;</div>
+      <h4>No migration headaches</h4>
+      <p>No need to get 6,000 guards to download an app. No cloud migration. No data risk. Jem works through WhatsApp — the channel they already use daily. Zero friction deployment.</p>
+      <div class="vs-tag">Easy Roster: Cloud migration + app rollout required</div>
+    </div>
+
+    <div class="why-card">
+      <div class="why-icon">&#128279;</div>
+      <h4>Ingest Easy Roster, then replace it</h4>
+      <p>Jem starts by importing your existing Easy Roster data as a baseline. No disruption. Over time, we progressively introduce smart rostering that makes the legacy system redundant.</p>
+      <div class="vs-tag">Easy Roster: On-premise, no AI, no automation</div>
+    </div>
+
+    <div class="why-card">
+      <div class="why-icon">&#129309;</div>
+      <h4>Design partnership</h4>
+      <p>Servest gets to shape this solution. As a design partner, you influence the roadmap and get a system built around your real operational needs — not generic features designed for someone else.</p>
+      <div class="vs-tag">Easy Roster: Off-the-shelf, take-it-or-leave-it</div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ── Our Approach ── -->
+<div class="section">
+  <span class="section-label">Our Approach</span>
+  <h2>How we get there</h2>
+  <p class="subtitle">A phased rollout designed for zero disruption and fast time-to-value.</p>
+
+  <div class="approach-steps">
+    <div class="approach-step">
+      <div class="step-num">1</div>
+      <h4>Ingest &amp; connect</h4>
+      <p>Import Easy Roster data. Connect Jem to your existing systems. Onboard guards via WhatsApp — no app downloads needed.</p>
+    </div>
+    <div class="approach-step">
+      <div class="step-num">2</div>
+      <h4>Automate attendance</h4>
+      <p>Deploy instant roll call, AI no-show calling, and automated shift replacement across all regions.</p>
+    </div>
+    <div class="approach-step">
+      <div class="step-num">3</div>
+      <h4>Smart rostering</h4>
+      <p>Launch AI-powered rostering that optimises for cost, skills, and fairness — replacing manual scheduling.</p>
+    </div>
+    <div class="approach-step">
+      <div class="step-num">4</div>
+      <h4>Scale &amp; evolve</h4>
+      <p>Expand to training, compliance, and workforce communication. Servest shapes the roadmap as a design partner.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── Footer CTA ── -->
+<div class="footer-cta">
+  <h2>Ready to transform your operations?</h2>
+  <p>Let's build this together. Servest gets a solution designed for your reality — not someone else's.</p>
+  <a href="mailto:hello@jemhr.com" class="cta-btn">Let's talk</a>
+  <div class="logos-footer" style="margin-top: 40px;">
+    <div class="jem-logo" style="background: rgba(255,255,255,0.15); height: 40px; padding: 8px 22px;">
+      <span style="font-size: 18px;">jem</span>
+    </div>
+    <span style="color: rgba(255,255,255,0.3); font-size: 20px;">&times;</span>
+    <img src="https://www.servest.co.za/wp-content/uploads/2024/10/Logo-main.png" alt="Servest" style="height: 32px; filter: brightness(0) invert(1);" />
+  </div>
+</div>
+
+</div><!-- end #page-content -->
+
+<script>
+  // Simple SHA-256 hash for client-side password check
+  async function sha256(message) {
+    const msgBuffer = new TextEncoder().encode(message);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  // Pre-computed SHA-256 of "servest"
+  const CORRECT_HASH = '9f0a763f383ef3f74257c82e8bd4044e0818fa3dbfab1ef498e20e17e3b09844';
+
+  async function checkPassword() {
+    const input = document.getElementById('pw-input').value;
+    const hash = await sha256(input);
+
+    if (hash === CORRECT_HASH) {
+      document.getElementById('password-screen').classList.add('hidden');
+      document.getElementById('page-content').classList.add('visible');
+      sessionStorage.setItem('servest-auth', 'true');
+    } else {
+      document.getElementById('pw-error').textContent = 'Incorrect password. Please try again.';
+      document.getElementById('pw-input').value = '';
+      document.getElementById('pw-input').focus();
+    }
+  }
+
+  // Allow Enter key
+  document.getElementById('pw-input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') checkPassword();
+  });
+
+  // Check if already authenticated in this session
+  if (sessionStorage.getItem('servest-auth') === 'true') {
+    document.getElementById('password-screen').classList.add('hidden');
+    document.getElementById('page-content').classList.add('visible');
+  }
+
+  // Auto-focus password input
+  document.getElementById('pw-input').focus();
+</script>
+
+</body>
+</html>
